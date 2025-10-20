@@ -5,7 +5,7 @@
 This change introduces a modification to the `example.py` file and adds a new file named `trigger.txt`. The primary focus is on updating the input string for a response generation function to a different language.
 
 ### Key Changes
-- **example.py**: The input string for the `client.responses.create` function has been modified from English ("Write a one-sentence bedtime story about a unicorn.") to Korean ("테스트를 하는 게 진짜 즐거툰듯??").
+- **example.py**: The input string for the `client.responses.create` function has been modified from English ("Write a one-sentence bedtime story about a unicorn.") to Korean ("테스트를 하는 게 진짜 즐거툰듯ㅎㅎㅎㅎ?").
 - **trigger.txt**: A new file has been added without any specified content changes in the diff.
 
 ### Risk/Impact
