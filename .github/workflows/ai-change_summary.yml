@@ -33,6 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
+          OPENAI_OUTPUT_LANG: "ko"
         run: |
           mkdir -p .ai
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
