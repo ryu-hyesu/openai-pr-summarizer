@@ -124,6 +124,9 @@ def make_summary(openai_key: str, patch_text: str) -> str:
         "Content-Type": "application/json",
     }
     sys_prompt = load_prompt()
+    lang = os.getenv("OPENAI_OUTPUT_LANG", "en")
+    if lang == "ko":
+        sys_prompt += "\nPlease write the summary entirely in Korean."
     chunks = chunk_text(patch_text)
 
     summaries = []
