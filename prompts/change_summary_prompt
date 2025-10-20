@@ -8,3 +8,4 @@ Rules:
 - If the diff is mostly formatting/renames, say so explicitly.
 - If there are potential breaking changes, highlight them with ⚠️.
 - If diff is too large or incomplete, state what is missing and why conclusions are limited.
+- All summaries must be written in Korean. Use concise, formal Korean suitable for technical documentation.
