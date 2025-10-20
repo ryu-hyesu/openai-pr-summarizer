@@ -4,7 +4,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -15,21 +15,55 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install deps
         run: |
-          pip install requests python-dotenv openai
+          python -m pip install --upgrade pip
+          pip install requests openai python-dotenv
 
-      - name: Run summarizer
+      - name: Run summarizer (PR or manual)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_EVENT_PATH: ${{ github.event_path }}
         run: |
-          python scripts/ai_change_summary.py
+          mkdir -p .ai
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.mode }}" = "pr" ] && [ -n "${{ inputs.pr }}" ]; then
+              python scripts/ai_change_summary.py --pr "${{ inputs.pr }}" --out ".ai/summary.md"
+            else
+              python scripts/ai_change_summary.py --base "${{ inputs.base }}" --head "${{ inputs.head }}" --out ".ai/summary.md"
+            fi
+          else
+            python scripts/ai_change_summary.py --out ".ai/summary.md"
+          fi
+
+      - name: Upload artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-summary
+          path: .ai/summary.md
+          if-no-files-found: warn
+
+      - name: Commit summary.md to PR branch
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if [ -f .ai/summary.md ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            # PR 브랜치 체크아웃
+            git checkout "${{ github.head_ref }}"
+            mkdir -p .ai
+            cp -f ../.ai/summary.md .ai/summary.md 2>/dev/null || true
+            git add .ai/summary.md
+            # [skip ci]로 무한 트리거 방지
+            git commit -m "chore(ai): add auto summary [skip ci]" || echo "no changes"
+            git push origin "${{ github.head_ref }}" || true
+          fi
